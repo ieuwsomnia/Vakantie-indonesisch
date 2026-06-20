@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Kosakata Liburan · Niveau 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FAF4E9;
+    --ink:#1B2B2A;
+    --teal:#1B4D4A;
+    --teal-dark:#0F3431;
+    --marigold:#7A4B8C;
+    --terracotta:#C1432D;
+    --sage:#3F7D6B;
+    --paper:#FFFDF8;
+    --line:#D9CDB5;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .app{
+    width:100%;
+    max-width:440px;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    padding:0 0 24px;
+  }
+
+  /* ---------- HEADER (ticket stub) ---------- */
+  .ticket-header{
+    background:var(--teal);
+    color:var(--paper);
+    padding:18px 20px 14px;
+    border-bottom:3px dashed var(--marigold);
+    position:relative;
+  }
+  .ticket-header .eyebrow{
+    font-family:'Space Grotesk',monospace;
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    opacity:.75;
+    display:flex;
+    justify-content:space-between;
+  }
+  .ticket-header h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:26px;
+    margin:6px 0 2px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .ticket-header h1 svg{flex-shrink:0;}
+  .ticket-header .sub{
+    font-size:13px;
+    opacity:.85;
+  }
+  .punch{
+    position:absolute;
+    width:18px;height:18px;
+    background:var(--cream);
+    border-radius:50%;
+    bottom:-12px;
+  }
+  .punch.left{left:14px;}
+  .punch.right{right:14px;}
+
+  /* ---------- CONTROLS ---------- */
+  .controls{
+    padding:18px 18px 4px;
+  }
+  .cat-row{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding-bottom:10px;
+    scrollbar-width:none;
+  }
+  .cat-row::-webkit-scrollbar{display:none;}
+  .chip{
+    flex-shrink:0;
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    font-weight:600;
+    padding:7px 13px;
+    border-radius:999px;
+    border:1.5px solid var(--line);
+    background:var(--paper);
+    color:var(--teal-dark);
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .chip.active{
+    background:var(--teal);
+    border-color:var(--teal);
+    color:var(--paper);
+  }
+  .filter-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:4px;
+    font-size:13px;
+  }
+  .toggle{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    cursor:pointer;
+    user-select:none;
+    font-weight:600;
+    color:var(--teal-dark);
+  }
+  .toggle input{
+    width:34px;height:20px;
+    appearance:none;
+    background:var(--line);
+    border-radius:999px;
+    position:relative;
+    cursor:pointer;
+    outline:none;
+    transition:.2s;
+  }
+  .toggle input:checked{background:var(--marigold);}
+  .toggle input::before{
+    content:'';
+    position:absolute;
+    width:16px;height:16px;
+    background:var(--paper);
+    border-radius:50%;
+    top:2px;left:2px;
+    transition:.2s;
+  }
+  .toggle input:checked::before{transform:translateX(14px);}
+  .deck-count{
+    font-family:'Space Grotesk',monospace;
+    font-size:12px;
+    color:var(--sage);
+    font-weight:700;
+  }
+
+  /* ---------- CARD STAGE ---------- */
+  .card-stage{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:14px 20px;
+    perspective:1400px;
+  }
+  .flashcard{
+    width:100%;
+    min-height:280px;
+    position:relative;
+    transform-style:preserve-3d;
+    transition:transform .45s cubic-bezier(.4,.2,.2,1);
+    cursor:pointer;
+  }
+  .flashcard.flipped{transform:rotateY(180deg);}
+  .face{
+    position:absolute;
+    inset:0;
+    backface-visibility:hidden;
+    border-radius:18px;
+    border:1.5px solid var(--line);
+    background:var(--paper);
+    padding:26px 22px;
+    display:flex;
+    flex-direction:column;
+    box-shadow:0 8px 24px -8px rgba(27,43,42,.18);
+  }
+  .face .cat-label{
+    font-family:'Space Grotesk',monospace;
+    font-size:11px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--marigold);
+    font-weight:700;
+    margin-bottom:auto;
+  }
+  .face .phrase{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:23px;
+    line-height:1.28;
+    color:var(--teal-dark);
+  }
+  .face .hint{
+    margin-top:14px;
+    font-size:13px;
+    color:#8A7F66;
+  }
+  .face.back{
+    transform:rotateY(180deg);
+    background:var(--teal);
+  }
+  .face.back .cat-label{color:var(--cream);opacity:.6;}
+  .face.back .phrase{color:var(--paper);font-size:20px;}
+  .face .tap-hint{
+    margin-top:auto;
+    font-size:11px;
+    text-align:center;
+    opacity:.45;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+  }
+  .face.back .tap-hint{color:var(--cream);}
+
+  /* ---------- SCORE ACTIONS ---------- */
+  .score-actions{
+    display:flex;
+    gap:10px;
+    padding:6px 20px 4px;
+    min-height:54px;
+  }
+  .score-btn{
+    flex:1;
+    border:none;
+    border-radius:14px;
+    padding:14px 10px;
+    font-family:'Inter',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    cursor:pointer;
+    transition:transform .1s;
+  }
+  .score-btn:active{transform:scale(.97);}
+  .score-btn.review{
+    background:#F6E2D8;
+    color:var(--terracotta);
+  }
+  .score-btn.know{
+    background:#DDEDE5;
+    color:var(--sage);
+  }
+  .score-actions[hidden]{display:none;}
+
+  /* ---------- FOOTER ---------- */
+  .progress-bar{
+    height:4px;
+    background:var(--line);
+    border-radius:2px;
+    margin:0 20px 10px;
+    overflow:hidden;
+  }
+  .progress-bar-fill{
+    height:100%;
+    background:var(--marigold);
+    transition:width .3s;
+  }
+  .stats-row{
+    display:flex;
+    justify-content:space-between;
+    padding:0 20px;
+    font-size:12px;
+    color:#8A7F66;
+  }
+  .reset-link{
+    text-align:center;
+    margin-top:18px;
+    font-size:12px;
+    color:#A89B7E;
+    text-decoration:underline;
+    cursor:pointer;
+  }
+  .shuffle-btn{
+    background:none;
+    border:none;
+    color:var(--teal-dark);
+    font-size:12px;
+    font-weight:700;
+    text-decoration:underline;
+    cursor:pointer;
+    padding:0;
+  }
+  .level-badge{
+    display:inline-block;
+    background:var(--marigold);
+    color:var(--paper);
+    font-family:'Space Grotesk',monospace;
+    font-size:10px;
+    letter-spacing:.1em;
+    padding:3px 8px;
+    border-radius:6px;
+    margin-left:6px;
+    vertical-align:middle;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="ticket-header">
+    <div class="eyebrow"><span>Kosakata Liburan</span><span>ID → NL</span></div>
+    <h1>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2.5 1.5V22l4-1l4 1v-1.5L13 19v-4.5l8 2.5z"/></svg>
+      Vakantie-Indonesisch<span class="level-badge">NIVEAU 2</span>
+    </h1>
+    <div class="sub">90 woorden &amp; zinnen — verbindingen, klachten, nuance, plannen</div>
+    <div class="punch left"></div>
+    <div class="punch right"></div>
+  </div>
+
+  <div class="controls">
+    <div class="cat-row" id="catRow"></div>
+    <div class="filter-row">
+      <label class="toggle">
+        <input type="checkbox" id="reviewToggle">
+        <span>Alleen nog niet onder de knie</span>
+      </label>
+      <span class="deck-count" id="deckCount"></span>
+    </div>
+  </div>
+
+  <div class="card-stage">
+    <div class="flashcard" id="flashcard">
+      <div class="face front">
+        <div class="cat-label" id="frontCat">Categorie</div>
+        <div class="phrase" id="frontPhrase">—</div>
+        <div class="tap-hint">Tik om te draaien</div>
+      </div>
+      <div class="face back">
+        <div class="cat-label" id="backCat">Categorie</div>
+        <div class="phrase" id="backPhrase">—</div>
+        <div class="hint" id="backHint"></div>
+        <div class="tap-hint">Tik om terug te draaien</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="score-actions" id="scoreActions" hidden>
+    <button class="score-btn review" id="btnReview">Nog niet 🔁</button>
+    <button class="score-btn know" id="btnKnow">Weet ik al ✓</button>
+  </div>
+
+  <div class="progress-bar"><div class="progress-bar-fill" id="progressFill"></div></div>
+  <div class="stats-row">
+    <span id="statsLeft">0 / 0 in dit dek</span>
+    <button class="shuffle-btn" id="shuffleBtn">🔀 Schudden</button>
+  </div>
+
+  <div class="reset-link" id="resetLink">Voortgang wissen</div>
+</div>
+
+<script>
+const DATA = [
+  // Tijd & frequentie
+  {c:"Tijd & frequentie", id:"Saya sudah pesan", nl:"Ik heb al besteld"},
+  {c:"Tijd & frequentie", id:"Saya akan kembali besok", nl:"Ik kom morgen terug"},
+  {c:"Tijd & frequentie", id:"Saya sedang menunggu", nl:"Ik ben aan het wachten"},
+  {c:"Tijd & frequentie", id:"Saya baru tiba", nl:"Ik ben net aangekomen"},
+  {c:"Tijd & frequentie", id:"Sebentar lagi", nl:"Over een momentje"},
+  {c:"Tijd & frequentie", id:"Biasanya saya bangun jam 7", nl:"Normaal sta ik om 7 uur op"},
+  {c:"Tijd & frequentie", id:"Kadang-kadang", nl:"Soms"},
+  {c:"Tijd & frequentie", id:"Jarang", nl:"Zelden"},
+  {c:"Tijd & frequentie", id:"Sering", nl:"Vaak"},
+  {c:"Tijd & frequentie", id:"Setiap hari", nl:"Elke dag"},
+
+  // Verbindingswoorden
+  {c:"Verbindingswoorden", id:"Kalau bisa, saya mau kamar yang lebih tenang", nl:"Als het kan, wil ik graag een rustigere kamer"},
+  {c:"Verbindingswoorden", id:"Saya tidak datang karena hujan", nl:"Ik kom niet vanwege de regen"},
+  {c:"Verbindingswoorden", id:"Tolong masak supaya tidak terlalu pedas", nl:"Maak het graag zo dat het niet te pittig is"},
+  {c:"Verbindingswoorden", id:"Sebelum makan, saya cuci tangan", nl:"Voor het eten was ik mijn handen"},
+  {c:"Verbindingswoorden", id:"Sesudah ini, kita ke pantai", nl:"Hierna gaan we naar het strand"},
+  {c:"Verbindingswoorden", id:"Saya suka ini, tapi terlalu mahal", nl:"Ik vind dit leuk, maar het is te duur"},
+  {c:"Verbindingswoorden", id:"Mau teh atau kopi?", nl:"Wil je thee of koffie?"},
+  {c:"Verbindingswoorden", id:"Jadi, kita pergi sekarang?", nl:"Dus, gaan we nu?"},
+  {c:"Verbindingswoorden", id:"Kecuali hari Minggu", nl:"Behalve op zondag"},
+  {c:"Verbindingswoorden", id:"Makanya saya terlambat", nl:"Daarom kwam ik laat"},
+
+  // Klachten oplossen
+  {c:"Klachten oplossen", id:"Ini terlalu asin", nl:"Dit is te zout"},
+  {c:"Klachten oplossen", id:"Bisa diganti?", nl:"Kan dit vervangen worden?"},
+  {c:"Klachten oplossen", id:"Kamar saya belum dibersihkan", nl:"Mijn kamer is nog niet schoongemaakt"},
+  {c:"Klachten oplossen", id:"Pesanan saya salah", nl:"Mijn bestelling klopt niet"},
+  {c:"Klachten oplossen", id:"Ini rusak, bisa diperbaiki?", nl:"Dit is kapot, kan het gerepareerd worden?"},
+  {c:"Klachten oplossen", id:"Saya mau uang saya kembali", nl:"Ik wil mijn geld terug"},
+  {c:"Klachten oplossen", id:"Ada yang bisa membantu?", nl:"Is er iemand die kan helpen?"},
+  {c:"Klachten oplossen", id:"Saya sudah menunggu lama sekali", nl:"Ik wacht al heel lang"},
+  {c:"Klachten oplossen", id:"Ini tidak sesuai pesanan", nl:"Dit klopt niet met wat ik bestelde"},
+  {c:"Klachten oplossen", id:"Maaf, saya mau komplain", nl:"Sorry, ik wil een klacht indienen"},
+
+  // Voorkeuren & vergelijken
+  {c:"Voorkeuren & vergelijken", id:"Saya lebih suka yang pedas", nl:"Ik heb liever de pittige"},
+  {c:"Voorkeuren & vergelijken", id:"Ini paling enak di sini", nl:"Dit is het lekkerst hier"},
+  {c:"Voorkeuren & vergelijken", id:"Lebih murah dibandingkan yang itu", nl:"Goedkoper dan dat andere"},
+  {c:"Voorkeuren & vergelijken", id:"Saya pilih yang ini daripada itu", nl:"Ik kies dit liever dan dat"},
+  {c:"Voorkeuren & vergelijken", id:"Sama seperti di rumah", nl:"Net als thuis"},
+  {c:"Voorkeuren & vergelijken", id:"Yang mana lebih bagus?", nl:"Welke is beter?"},
+  {c:"Voorkeuren & vergelijken", id:"Saya tidak terlalu suka ini", nl:"Ik vind dit niet zo lekker/leuk"},
+  {c:"Voorkeuren & vergelijken", id:"Rasanya berbeda dari yang biasa", nl:"Het smaakt anders dan normaal"},
+  {c:"Voorkeuren & vergelijken", id:"Ini lebih besar dari yang saya kira", nl:"Dit is groter dan ik dacht"},
+  {c:"Voorkeuren & vergelijken", id:"Keduanya bagus", nl:"Ze zijn allebei goed"},
+
+  // Grote getallen & prijzen
+  {c:"Grote getallen & prijzen", id:"Dua ratus ribu rupiah", nl:"Tweehonderdduizend rupiah"},
+  {c:"Grote getallen & prijzen", id:"Setengah harga", nl:"Halve prijs"},
+  {c:"Grote getallen & prijzen", id:"Seperempat kilo", nl:"Een kwart kilo"},
+  {c:"Grote getallen & prijzen", id:"Lima belas ribu saja", nl:"Slechts vijftienduizend"},
+  {c:"Grote getallen & prijzen", id:"Itu terlalu mahal, bisa lebih murah?", nl:"Dat is te duur, kan het goedkoper?"},
+  {c:"Grote getallen & prijzen", id:"Saya tawar setengah harganya", nl:"Ik bied de helft van de prijs"},
+  {c:"Grote getallen & prijzen", id:"Pas segini, ya?", nl:"Is dit bedrag goed, oké?"},
+  {c:"Grote getallen & prijzen", id:"Berapa kalau saya beli tiga?", nl:"Hoeveel als ik er drie koop?"},
+  {c:"Grote getallen & prijzen", id:"Ada harga grosir?", nl:"Is er een groothandelsprijs?"},
+  {c:"Grote getallen & prijzen", id:"Sudah termasuk pajak?", nl:"Is de belasting er al bij inbegrepen?"},
+
+  // Gevoelens & mening
+  {c:"Gevoelens & mening", id:"Menurut saya, ini bagus", nl:"Volgens mij is dit goed"},
+  {c:"Gevoelens & mening", id:"Saya pikir kita harus pergi sekarang", nl:"Ik denk dat we nu moeten gaan"},
+  {c:"Gevoelens & mening", id:"Saya merasa agak lelah", nl:"Ik voel me een beetje moe"},
+  {c:"Gevoelens & mening", id:"Sayang sekali", nl:"Wat jammer"},
+  {c:"Gevoelens & mening", id:"Untung saya bawa payung", nl:"Gelukkig had ik een paraplu bij me"},
+  {c:"Gevoelens & mening", id:"Saya agak khawatir", nl:"Ik ben een beetje bezorgd"},
+  {c:"Gevoelens & mening", id:"Saya senang sekali bisa di sini", nl:"Ik ben heel blij dat ik hier kan zijn"},
+  {c:"Gevoelens & mening", id:"Saya kecewa dengan pelayanannya", nl:"Ik ben teleurgesteld over de service"},
+  {c:"Gevoelens & mening", id:"Itu mengejutkan", nl:"Dat is verrassend"},
+  {c:"Gevoelens & mening", id:"Saya rasa itu ide bagus", nl:"Ik denk dat dat een goed idee is"},
+
+  // Plannen & afspraken
+  {c:"Plannen & afspraken", id:"Apa rencana kita besok?", nl:"Wat is ons plan voor morgen?"},
+  {c:"Plannen & afspraken", id:"Kita harus pesan dulu", nl:"We moeten eerst reserveren"},
+  {c:"Plannen & afspraken", id:"Jadwalnya jam berapa?", nl:"Hoe laat is het schema/de planning?"},
+  {c:"Plannen & afspraken", id:"Berapa hari lagi sampai kita berangkat?", nl:"Hoeveel dagen nog tot we vertrekken?"},
+  {c:"Plannen & afspraken", id:"Saya mau ubah jadwal", nl:"Ik wil de planning veranderen"},
+  {c:"Plannen & afspraken", id:"Bisa kita atur ulang?", nl:"Kunnen we het opnieuw plannen?"},
+  {c:"Plannen & afspraken", id:"Saya sudah konfirmasi", nl:"Ik heb al bevestigd"},
+  {c:"Plannen & afspraken", id:"Tolong ingatkan saya", nl:"Herinner me er graag aan"},
+  {c:"Plannen & afspraken", id:"Kita ketemu di mana?", nl:"Waar ontmoeten we elkaar?"},
+  {c:"Plannen & afspraken", id:"Sampai jam berapa bukanya?", nl:"Tot hoe laat is het open?"},
+
+  // Sociale verdieping
+  {c:"Sociale verdieping", id:"Apa yang Anda rekomendasikan?", nl:"Wat zou je aanraden?"},
+  {c:"Sociale verdieping", id:"Indonesia berbeda dengan Belanda, ya", nl:"Indonesië is anders dan Nederland, hè"},
+  {c:"Sociale verdieping", id:"Saya ingin belajar lebih banyak tentang budaya di sini", nl:"Ik wil meer leren over de cultuur hier"},
+  {c:"Sociale verdieping", id:"Boleh saya tanya sesuatu?", nl:"Mag ik iets vragen?"},
+  {c:"Sociale verdieping", id:"Apa kebiasaan di sini?", nl:"Wat is hier de gewoonte?"},
+  {c:"Sociale verdieping", id:"Saya kagum dengan keramahan orang sini", nl:"Ik ben onder de indruk van de vriendelijkheid van de mensen hier"},
+  {c:"Sociale verdieping", id:"Bagaimana cara mengucapkan ini?", nl:"Hoe spreek je dit uit?"},
+  {c:"Sociale verdieping", id:"Apa artinya ini?", nl:"Wat betekent dit?"},
+  {c:"Sociale verdieping", id:"Saya ingin kembali lagi suatu hari", nl:"Ik wil hier ooit weer terugkomen"},
+  {c:"Sociale verdieping", id:"Terima kasih atas bantuannya", nl:"Bedankt voor de hulp"},
+
+  // Gezondheid & weer in detail
+  {c:"Gezondheid & weer", id:"Saya merasa mual", nl:"Ik voel me misselijk"},
+  {c:"Gezondheid & weer", id:"Sudah berapa lama sakitnya?", nl:"Hoelang heb je deze klacht al?"},
+  {c:"Gezondheid & weer", id:"Apakah ada efek samping?", nl:"Zijn er bijwerkingen?"},
+  {c:"Gezondheid & weer", id:"Saya butuh istirahat", nl:"Ik heb rust nodig"},
+  {c:"Gezondheid & weer", id:"Cuacanya lembap sekali", nl:"Het is erg vochtig/drukkend"},
+  {c:"Gezondheid & weer", id:"Sekarang musim hujan", nl:"Het is nu regenseizoen"},
+  {c:"Gezondheid & weer", id:"Sepertinya akan hujan", nl:"Het lijkt erop dat het gaat regenen"},
+  {c:"Gezondheid & weer", id:"Panasnya menyengat", nl:"De hitte is fel/brandend"},
+  {c:"Gezondheid & weer", id:"Saya butuh tabir surya", nl:"Ik heb zonnebrandcrème nodig"},
+  {c:"Gezondheid & weer", id:"Bawa jas hujan, ya", nl:"Neem een regenjas mee, hè"},
+];
+DATA.forEach((d,i)=>d.uid = i);
+
+const STORAGE_KEY = "kosakataLiburanProgressV2";
+let progress = {};
+try{ progress = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }catch(e){ progress = {}; }
+
+function saveProgress(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); }catch(e){}
+}
+function statusOf(uid){ return progress[uid] || "new"; }
+
+const categories = ["Alle", ...new Set(DATA.map(d=>d.c))];
+let activeCat = "Alle";
+let onlyReview = false;
+let queue = [];
+let qIndex = 0;
+let flipped = false;
+
+const catRow = document.getElementById("catRow");
+categories.forEach(cat=>{
+  const btn = document.createElement("button");
+  btn.className = "chip" + (cat===activeCat ? " active" : "");
+  btn.textContent = cat;
+  btn.onclick = ()=>{ activeCat = cat; updateChips(); buildQueue(); };
+  btn.dataset.cat = cat;
+  catRow.appendChild(btn);
+});
+function updateChips(){
+  [...catRow.children].forEach(b=> b.classList.toggle("active", b.dataset.cat===activeCat));
+}
+
+document.getElementById("reviewToggle").addEventListener("change", e=>{
+  onlyReview = e.target.checked;
+  buildQueue();
+});
+
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function buildQueue(){
+  let pool = DATA.filter(d => activeCat==="Alle" || d.c===activeCat);
+  if(onlyReview){ pool = pool.filter(d => statusOf(d.uid) !== "know"); }
+  queue = shuffle(pool.slice());
+  qIndex = 0;
+  document.getElementById("deckCount").textContent = queue.length + " kaarten";
+  showCard();
+}
+
+function showCard(){
+  const flashcard = document.getElementById("flashcard");
+  flashcard.classList.remove("flipped");
+  flipped = false;
+  document.getElementById("scoreActions").hidden = true;
+
+  if(queue.length === 0){
+    document.getElementById("frontCat").textContent = "Klaar!";
+    document.getElementById("frontPhrase").textContent = "🎉 Niks meer in dit dek";
+    document.getElementById("backCat").textContent = "";
+    document.getElementById("backPhrase").textContent = "";
+    document.getElementById("statsLeft").textContent = "0 / 0 in dit dek";
+    document.getElementById("progressFill").style.width = "0%";
+    return;
+  }
+  if(qIndex >= queue.length){ qIndex = 0; shuffle(queue); }
+
+  const card = queue[qIndex];
+  document.getElementById("frontCat").textContent = card.c;
+  document.getElementById("frontPhrase").textContent = card.id;
+  document.getElementById("backCat").textContent = card.c;
+  document.getElementById("backPhrase").textContent = card.nl;
+  document.getElementById("backHint").textContent =
+    statusOf(card.uid)==="review" ? "Stond op je 'nog niet'-stapel" : "";
+
+  document.getElementById("statsLeft").textContent = (qIndex+1) + " / " + queue.length + " in dit dek";
+  document.getElementById("progressFill").style.width = Math.round(((qIndex)/queue.length)*100) + "%";
+}
+
+document.getElementById("flashcard").addEventListener("click", ()=>{
+  if(queue.length === 0) return;
+  flipped = !flipped;
+  document.getElementById("flashcard").classList.toggle("flipped", flipped);
+  document.getElementById("scoreActions").hidden = !flipped;
+});
+
+function score(result){
+  const card = queue[qIndex];
+  progress[card.uid] = result;
+  saveProgress();
+  qIndex++;
+  showCard();
+}
+document.getElementById("btnReview").onclick = ()=>score("review");
+document.getElementById("btnKnow").onclick = ()=>score("know");
+
+document.getElementById("shuffleBtn").onclick = ()=>{ shuffle(queue); qIndex=0; showCard(); };
+
+document.getElementById("resetLink").onclick = ()=>{
+  if(confirm("Alle voortgang wissen? Dit kan niet ongedaan worden.")){
+    progress = {};
+    saveProgress();
+    buildQueue();
+  }
+};
+
+buildQueue();
+</script>
+</body>
+</html>
